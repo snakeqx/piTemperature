@@ -1,0 +1,23 @@
+<div class="container">
+{{.temperature}}
+</div>
+
+
+<div class="container" id="jsondata"></div>
+
+<!-- JQuery Scripts -->
+<script>
+    // get the json data from server
+	// when document is fully loaded
+	$(document).ready(function(){
+		// get json data from /getdata
+		$.getJSON("/getdata",function(data){
+			// for each data set
+			$.each(data, function(i, field){
+				// expand the <div id = "jsondata"></div> element
+				$("div#jsondata").append(field+" ");
+			});
+		});
+	});
+</script>
+

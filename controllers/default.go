@@ -14,7 +14,8 @@ type SendJsonController struct{
 }
 
 func (c *MainController) Get() {
-	c.TplName = "index.html"
+    c.Layout = "base.html"
+	c.TplName = "main.html"
     c.Data["temperature"], _=tasks.ReadTemperature()
 }
 
