@@ -14,7 +14,7 @@ import(
 
 func init() {
 	// define tasks
-	taskGetTemperature := toolbox.NewTask("taskGetTemperature", "*/5 * * * * *", GetTemperature)
+	taskGetTemperature := toolbox.NewTask("taskGetTemperature", beego.AppConfig.String("taskfrequency"), GetTemperature)
 
 	// add tasks into global task list
 	toolbox.AddTask("taskGetTemperature", taskGetTemperature)

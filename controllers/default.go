@@ -3,6 +3,8 @@ package controllers
 import (
 	"github.com/astaxie/beego"
     "piTemperature/tasks"
+    "piTemperature/models"
+    "github.com/astaxie/beego/orm"
 )
 
 type MainController struct {
@@ -20,13 +22,14 @@ func (c *MainController) Get() {
 }
 
 func (c *SendJsonController) Get(){
-	hash :=Hash{"1235", 64.113}
-	c.Data["json"]=hash
+    // define the return value is a list of struct temperatures
+    var temperatures []*models.Temperatures
+    // define queity
+    o := orm.NewOrm()
+    qs :=o.QueryTable("temperatures")
+    qs.OrderBy("-id").Limit(20).All(&temperatures)
+	c.Data["json"]=temperatures
 	c.ServeJSON()
 }
 
 
-type Hash struct {
-	Time string
-	Temperature float64
-}

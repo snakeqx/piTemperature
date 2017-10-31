@@ -1,5 +1,6 @@
 <div class="container">
-{{.temperature}}
+Current CPU temperature:{{.temperature}}&#8451
+<!-- &#8451 is the symbol for degree -->
 </div>
 
 
@@ -7,17 +8,33 @@
 
 <!-- JQuery Scripts -->
 <script>
+    var gTemperature=new Array();
+    var gTime=new Array();
     // get the json data from server
 	// when document is fully loaded
 	$(document).ready(function(){
+        // here to set async to false, otherwise the code after getJson will be
+        // run before JSON data is parsed.
+        $.ajaxSettings.async=false;
 		// get json data from /getdata
 		$.getJSON("/getdata",function(data){
 			// for each data set
-			$.each(data, function(i, field){
-				// expand the <div id = "jsondata"></div> element
-				$("div#jsondata").append(field+" ");
+			$.each(data, function(i, object){
+                // for struct with Id, Time and Temperature
+                $.each(object, function(j, field){
+                    if (j=="Id") return true;
+                    if (j=="Time") gTime.push(field);
+                    if (j=="Temperature") gTemperature.push(field);
+                });
 			});
-		});
-	});
+		});// end of getJSON
+
+        $.each(gTemperature, function(i, o){
+            $("div#jsondata").append(o+"<br/>");
+        });
+
+        // don't forget to set the async back
+        $.ajaxSettings.async=true;
+	});// end of document readuy   
 </script>
 
