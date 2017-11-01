@@ -5,36 +5,105 @@ Current CPU temperature:{{.temperature}}&#8451
 
 
 <div class="container" id="jsondata"></div>
+<div class="container">
+    <canvas id="myChart"></canvas> 
+</div>
 
 <!-- JQuery Scripts -->
+<script src="https://cdn.bootcss.com/Chart.js/2.7.0/Chart.min.js"></script>
+<script src="https://cdn.bootcss.com/Chart.js/2.7.0/Chart.bundle.min.js"></script>
+
 <script>
-    var gTemperature=new Array();
-    var gTime=new Array();
-    // get the json data from server
-	// when document is fully loaded
-	$(document).ready(function(){
-        // here to set async to false, otherwise the code after getJson will be
-        // run before JSON data is parsed.
-        $.ajaxSettings.async=false;
-		// get json data from /getdata
-		$.getJSON("/getdata",function(data){
-			// for each data set
-			$.each(data, function(i, object){
-                // for struct with Id, Time and Temperature
-                $.each(object, function(j, field){
-                    if (j=="Id") return true;
-                    if (j=="Time") gTime.push(field);
-                    if (j=="Temperature") gTemperature.push(field);
-                });
-			});
-		});// end of getJSON
+var gTemperature=new Array();
+var gTime=new Array();
+// get the json data from server
+// when document is fully loaded
+$(document).ready(function(){
+    // here to set async to false, otherwise the code after getJson will be
+    // run before JSON data is parsed.
+    $.ajaxSettings.async=false;
+	// get json data from /getdata
+    $.getJSON("/getdata",function(data){
+		// for each data set
+		$.each(data, function(i, object){
+            // for struct with Id, Time and Temperature
+            $.each(object, function(j, field){
+                if (j=="Id") return true;
+                if (j=="Time") gTime.push(field);
+                if (j=="Temperature") gTemperature.push(field);
+            });
+	    });
+	});// end of getJSON
+     // don't forget to set the async back
+    $.ajaxSettings.async=true;
+});// end of document readuy   
+</script>
 
-        $.each(gTemperature, function(i, o){
-            $("div#jsondata").append(o+"<br/>");
-        });
 
-        // don't forget to set the async back
-        $.ajaxSettings.async=true;
-	});// end of document readuy   
+<script>
+// first set config and data
+$(document).ready(function(){
+var config={
+    type: 'line',
+    data:{
+        labels: gTime,
+        datasets:[
+            {
+                label: "last 20 measurements",
+                backgroundColor: "rgb(255,99,132)",
+                borderColor: "rgb(255,99,132)",
+                fillColor: "rgba(220,220,220,0.5)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                data: gTemperature,
+                fill: false
+            }]
+        },
+    options:{
+        responsive: true,
+        title:{
+            display: true,
+            text:'CPU temperature'
+        },
+        tooltips: {
+            mode: 'index',
+            intersect: false
+        },
+        hover:{
+            mode: 'nearest',
+            intersect: true
+        },
+        scales:{
+            xAxes: [{
+                display: true,
+                scaleLabel:{
+                    display: true,
+                    labelString:'Time'
+                }
+            }],
+            yAxes: [{
+                display: true,
+                scaleLabel:{
+                    display: true,
+                    labelString: 'Temperature',
+                },
+                ticks:{
+                    min:20,
+                    max:70,
+                    stepSize:5
+                }
+            }]
+        }//end of scales
+
+    }//end of options
+};
+
+// select the element
+var ctx=$("#myChart").get(0).getContext("2d");
+// draw line plot
+var myNewChart = new Chart(ctx, config);
+myNewChart.update();
+});//end of document ready
 </script>
 
