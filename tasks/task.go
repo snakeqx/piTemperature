@@ -8,16 +8,17 @@ import(
 	"piTemperature/models"
 	"time"
 	"os"
+    "os/exec"
 	"strconv"
 	"bufio"
 )
 
 func init() {
 	// define tasks
-	taskGetTemperature := toolbox.NewTask("taskGetTemperature", beego.AppConfig.String("taskfrequency"), GetTemperature)
+	taskStoreTemperature := toolbox.NewTask("taskStoreTemperature", beego.AppConfig.String("taskfrequency"), StoreTemperature)
 
 	// add tasks into global task list
-	toolbox.AddTask("taskGetTemperature", taskGetTemperature)
+	toolbox.AddTask("taskStoreTemperature", taskStoreTemperature)
 
 	// orm handling of database
 	orm.RegisterDriver("mysql", orm.DRMySQL)
@@ -27,26 +28,35 @@ func init() {
 	//para3: connection by below format:
 	//       <user>:<password>@/<databasename in mysql>?<charset>
 	//                         ^ be aware of the slash ("/"), this is mandantory
-	orm.RegisterDataBase("default", "mysql", "defaultuser:default@/various?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "defaultuser:default@/various?charset=utf8&loc=Asia%2FShanghai")
 	// create table
 	orm.RunSyncdb("default", true, true)
 }
 
 
-func GetTemperature () error {
+func StoreTemperature () error {
 	o := orm.NewOrm()
 	o.Using("default")
 
 	temp := new(models.Temperatures)
 	timeNow:=time.Now()
-	temp.Time=timeNow.Format("2006-01-02 15:04:05")
-	temp.Temperature, _ =ReadTemperature()
+	temp.Time=timeNow//.Format("2006-01-02 15:04:05")
+    var err error
+	temp.CpuTemperature, err= ReadCpuTemperature()
+    if err !=nil{
+        return err
+    }
+    temp.GpuTemperature, err = ReadGpuTemperature()
+    if err != nil{
+        return err
+    }
 
 	o.Insert(temp)
+
 	return nil
 }
 
-func ReadTemperature() (float64, error) {
+func ReadCpuTemperature() (float64, error) {
 	fileString:=`/sys/class/thermal/thermal_zone0/temp`
 	file, err := os.Open(fileString)
 	defer file.Close()
@@ -78,3 +88,18 @@ func ReadTemperature() (float64, error) {
 	return tempFloat, nil 
 }
 
+func ReadGpuTemperature() (float64, error) {
+    cmd := exec.Command("vcgencmd","measure_temp")
+    output, err := cmd.Output()
+    if err != nil{
+        return -1, err
+    }
+    str := string(output)
+    str = str[5:len(str)-3]
+    f,err :=strconv.ParseFloat(str,64)
+    if err!=nil{
+        return -1, err
+    }
+    return f, err
+
+}

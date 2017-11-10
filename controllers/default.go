@@ -18,7 +18,8 @@ type SendJsonController struct{
 func (c *MainController) Get() {
     c.Layout = "base.html"
 	c.TplName = "main.html"
-    c.Data["temperature"], _=tasks.ReadTemperature()
+    c.Data["CpuTemperature"], _=tasks.ReadCpuTemperature()
+    c.Data["GpuTemperature"], _=tasks.ReadGpuTemperature()
 }
 
 func (c *SendJsonController) Get(){
@@ -27,7 +28,7 @@ func (c *SendJsonController) Get(){
     // define queity
     o := orm.NewOrm()
     qs :=o.QueryTable("temperatures")
-    qs.OrderBy("-id").Limit(20).All(&temperatures)
+    qs.OrderBy("-id").Limit(24).All(&temperatures)
 	c.Data["json"]=temperatures
 	c.ServeJSON()
 }

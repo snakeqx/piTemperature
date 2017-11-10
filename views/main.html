@@ -1,5 +1,6 @@
 <div class="container">
-Current CPU temperature:{{.temperature}}&#8451
+<p>Current CPU temperature:{{.CpuTemperature}}&#8451</p>
+<p>Current GPU temperature:{{.GpuTemperature}}&#8451</p>
 <!-- &#8451 is the symbol for degree -->
 </div>
 
@@ -14,7 +15,8 @@ Current CPU temperature:{{.temperature}}&#8451
 <script src="https://cdn.bootcss.com/Chart.js/2.7.0/Chart.bundle.min.js"></script>
 
 <script>
-var gTemperature=new Array();
+var gCpuTemperature=new Array();
+var gGpuTemperature=new Array();
 var gTime=new Array();
 // get the json data from server
 // when document is fully loaded
@@ -30,7 +32,8 @@ $(document).ready(function(){
             $.each(object, function(j, field){
                 if (j=="Id") return true;
                 if (j=="Time") gTime.push(field);
-                if (j=="Temperature") gTemperature.push(field);
+                if (j=="CpuTemperature") gCpuTemperature.push(field);
+                if (j=="GpuTemperature") gGpuTemperature.push(field); 
             });
 	    });
 	});// end of getJSON
@@ -49,14 +52,24 @@ var config={
         labels: gTime,
         datasets:[
             {
-                label: "last 20 measurements",
+                label: "last 20 cpu measurements",
                 backgroundColor: "rgb(255,99,132)",
                 borderColor: "rgb(255,99,132)",
                 fillColor: "rgba(220,220,220,0.5)",
                 strokeColor: "rgba(220,220,220,1)",
                 pointColor: "rgba(220,220,220,1)",
                 pointStrokeColor: "#fff",
-                data: gTemperature,
+                data: gCpuTemperature,
+                fill: false
+            },{
+                label: "last 20 gpu measurement",
+                background: "rgb(102, 102, 255)",
+                borderColor: "rgb(102,102,255)",
+                fillColor: "rgba(220,220,220,0.5)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokColor: "#fff",
+                data: gGpuTemperature,
                 fill: false
             }]
         },
